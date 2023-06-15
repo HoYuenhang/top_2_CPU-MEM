@@ -1,5 +1,6 @@
 import subprocess
 import time
+import multiprocessing
 
 def split_line(line):
     # 拆分为两部分，前一部分包含前11个元素，后一部分包含剩余的元素
@@ -58,7 +59,9 @@ def get_top_info():
             break
     # print(splited_lines)
     print("TIME: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "JST")
+    print("CORES: ", multiprocessing.cpu_count())
     print("CPU_SUM: ", CPU_SUM, "%")
+    print("CPU_100%SUM: ", CPU_SUM / (multiprocessing.cpu_count() * 100), "%")
     print("MEM_SUM: ", MEM_SUM, "%")
 
 print(get_top_info())
