@@ -18,23 +18,7 @@ def split_line(line):
 
 def get_top_info():
 
-    # f = open('cpu_summary.csv', 'w')
-    # header_columns = []
-    # columns = []
-    # header_columns.append("PID")
-    # header_columns.append("USER")
-    # header_columns.append("PR")
-    # header_columns.append("NICE")
-    # header_columns.append("VIRT")
-    # header_columns.append("RES")
-    # header_columns.append("SHR")
-    # header_columns.append("status")
-    # header_columns.append("％CPU")
-    # header_columns.append("％MEM")
-    # header_columns.append("TIME+")
-    # header_columns.append("COMMAND")
-    # f.write(",".join(header_columns) + "\n")
-
+    f = open(str(multiprocessing.cpu_count()) + 'cores_cpu_summary.csv', 'a')
     # 执行top命令并获取输出
     # top -b -d 0.2 -n 1000 -w 512 -c -H -i
     top_output = subprocess.check_output(['top', '-b', '-n', '1', '-w', '512', '-c', '-H', '-i'])
@@ -43,25 +27,46 @@ def get_top_info():
     # 寻找以PID USER PR NI等开始的那一行
     lines = top_output.split("\n")
     # splited_lines = []
+    columns = []
+    TIME = ""
     CPU_SUM = 0
     MEM_SUM = 0
+    # 迭代所有行
     for i in range(len(lines)):
+        # 如果该行以PID USER开始，则找到了进程信息的起始行
         if lines[i].strip().startswith("PID USER"):
             # 找到该行后，将该行之后的所有行作为进程信息
             process_info_lines = lines[i+1:]
-            
+            # 迭代每一行
             for i in range(len(process_info_lines)-1):
                 line = process_info_lines[i]
                 # 总CPU使用率和总MEM使用率
                 CPU_SUM += float(split_line(line)[8])
                 MEM_SUM += float(split_line(line)[9])
-            
-            break
+            TIME  = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            columns.append(TIME)
+            columns.append(str(CPU_SUM))
+            columns.append(str(CPU_SUM / (multiprocessing.cpu_count() * 100)))
+            columns.append(str(MEM_SUM))
+    f.write(",".join(columns) + "\n")
+
     # print(splited_lines)
-    print("TIME: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "JST")
+    print("TIME: ", TIME, "JST")
     print("CORES: ", multiprocessing.cpu_count())
     print("CPU_SUM: ", CPU_SUM, "%")
     print("CPU_100%SUM: ", CPU_SUM / (multiprocessing.cpu_count() * 100), "%")
     print("MEM_SUM: ", MEM_SUM, "%")
+    print("----------------------------------------")
 
-print(get_top_info())
+
+if __name__ == '__main__':
+
+    header_columns = []
+    with open(str(multiprocessing.cpu_count()) + 'cores_cpu_summary.csv', 'w') as f:
+        header_columns = ["TIME", "CPU_SUM", "CPU_100%SUM", "MEM_SUM"]
+        f.write(",".join(header_columns) + "\n")
+        
+    n = 0
+    while True:
+        get_top_info()
+        time.sleep(1)
