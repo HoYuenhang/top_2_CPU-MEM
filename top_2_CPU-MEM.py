@@ -66,7 +66,6 @@ if __name__ == '__main__':
         header_columns = ["TIME", "CPU_SUM", "CPU_100%SUM", "MEM_SUM"]
         f.write(",".join(header_columns) + "\n")
         
-    n = 0
     while True:
         get_top_info()
         time.sleep(1)
